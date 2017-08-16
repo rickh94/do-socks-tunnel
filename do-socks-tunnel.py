@@ -7,6 +7,7 @@ import hashlib
 import subprocess
 import time
 import digitalocean
+import random
 from cryptography.hazmat.primitives import serialization as \
     crypto_serialization
 from cryptography.hazmat.primitives.asymmetric import rsa
@@ -63,9 +64,8 @@ def create_droplet(dropname, sshkey_id, login_token, manager):
         token=login_token,
         name=dropname,
         region='nyc3',
-        image=17384153,
+        image='ubuntu-16-04-x64',
         size_slug='512mb',
-        vcpus=1,
         ssh_keys=[sshkey_id],
         backups=False,
     )
@@ -95,27 +95,37 @@ def destroy_droplet(dropid, login_token):
 # def create_tunnel(privkeypath, ipaddr)
 
 
-def cleanup(key_dict, dropid, login_token):
-    destroy_droplet(dropid, login_token)
+def cleanup(key_dict, dropinfo, login_token):
+    destroy_droplet(dropinfo['id'], login_token)
     destroy_key(key_dict['id'], login_token)
     os.remove(key_dict['private key'])
     os.remove(key_dict['public key'])
+    subprocess.run(['ssh-keygen', '-R', dropinfo['ipaddr']])
 
 
 def main():
+    # setup
     rw = RandomWords()
     keyname = '_'.join(rw.random_words(count=4))
     dropname = '-'.join(rw.random_words(count=2))
     token = os.environ['DO_API_TOKEN']
-    ssh_key = make_keys(keyname)
     manager = digitalocean.Manager(token=token)
+    portnum = random.randrange(1025, 65536)
+
+    ssh_key = make_keys(keyname)
     ssh_key['id'] = upload_key(ssh_key, token, manager)
     droplet = create_droplet(dropname, ssh_key['id'], token, manager)
-    # subprocess.run(['ssh', '-i',
-    #                 ssh_key['private key'],
-    #                 'root@{}'.format(droplet['ipaddr'])])
+
+    run_ssh = subprocess.run(['ssh',
+                              '-o', 'IdentitiesOnly=yes',
+                              '-i', ssh_key['private key'],
+                              # '-D', portnum,
+                              # '-N',
+                              # '-C',
+                              'root@{}'.format(droplet['ipaddr'])])
+
     input('press enter to destroy the droplet')
-    cleanup(ssh_key, droplet['id'], token)
+    cleanup(ssh_key, droplet, token)
 
 
 if __name__ == '__main__':
