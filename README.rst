@@ -6,7 +6,7 @@ on-the-fly to have a secure connection over a potentially insecure network.
 Installation
 ============
 For now
-.. code-block::
+::
 
 $ git clone https://github.com/rickh94/do-socks-tunnel.git
 $ python setup.py install
