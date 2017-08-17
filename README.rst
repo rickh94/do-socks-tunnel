@@ -20,7 +20,9 @@ You need:
   both support this in different ways).
 
 You do NOT need:
+
 * A VPN
+
 * A 24/7 server
 
 
@@ -73,8 +75,7 @@ The default configuration is currently hard-coded and is as follows\:
 
 * Keys
 
-  - name: four random words as word1\_word2\_word3\_word4(.pem,.pub) private key is
-    ``.pem`` and public key is ``.pub``.
+  - name: four random words as word1\_word2\_word3\_word4(.pem,.pub).
 
   - protocol: RSA
 
