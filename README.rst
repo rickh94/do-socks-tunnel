@@ -3,10 +3,17 @@ Digital Ocean Socks Tunnel
 A script to initialize a socks tunnel through a digital ocean droplet
 on-the-fly to have a secure connection over a potentially insecure network.
 
-Installation (NOT YET)
-======================
+Installation
+============
+For now
+.. code-block::
+
+$ git clone https://github.com/rickh94/do-socks-tunnel.git
+$ python setup.py install
+
+
 SOON:
-``pip install --user do-socks-tunnel``
+``$ pip install --user do-socks-tunnel``
 
 You need:
 
