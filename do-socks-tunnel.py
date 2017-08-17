@@ -1,10 +1,10 @@
 """Not-so-simple script to initiate a digitalocean droplet and tunnel through
 it using a socks proxy.  """
+import atexit
 import os
 import stat
-import base64
-import hashlib
 import subprocess
+import signal
 import time
 import digitalocean
 import random
@@ -115,17 +115,21 @@ def main():
     ssh_key = make_keys(keyname)
     ssh_key['id'] = upload_key(ssh_key, token, manager)
     droplet = create_droplet(dropname, ssh_key['id'], token, manager)
+    atexit.register(cleanup, ssh_key, droplet, token)
 
+    print('port number: {}'.format(portnum))
     run_ssh = subprocess.run(['ssh',
                               '-o', 'IdentitiesOnly=yes',
+                              '-o', 'StrictHostKeyChecking=no',
                               '-i', ssh_key['private key'],
-                              # '-D', portnum,
-                              # '-N',
-                              # '-C',
+                              '-N',
+                              '-C',
+                              '-f',
+                              '-D', str(portnum),
                               'root@{}'.format(droplet['ipaddr'])])
 
     input('press enter to destroy the droplet')
-    cleanup(ssh_key, droplet, token)
+    os.killpg(os.getpgid(run_ssh.pid), signal.SIGTERM)
 
 
 if __name__ == '__main__':
