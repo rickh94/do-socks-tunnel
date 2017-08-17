@@ -12,7 +12,7 @@ You need:
 
 * OpenSSH installed on your system.
 
-* You will also need a `Digital Ocean <https://digitalocean.com>` account and
+* You will also need a `Digital Ocean <https://digitalocean.com>`_ account and
   API token. (You can `generate one here
   <https://cloud.digitalocean.com/settings/api/tokens>`_).
 
