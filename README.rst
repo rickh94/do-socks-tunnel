@@ -85,6 +85,8 @@ TODO
 ====
 * BUG: fix auto-killing of ssh command.
 
+* BUG: sometimes ssh connection is refused. timing?
+
 * Add support for command line configuration of any of the above options
   (but still running the default config when run without).
 

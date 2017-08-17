@@ -1,0 +1,3 @@
+python-digitalocean
+cryptography
+randomwords
