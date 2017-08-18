@@ -1,5 +1,11 @@
 Digital Ocean Socks Tunnel
 ==========================
+.. image:: https://travis-ci.org/rickh94/do-socks-tunnel.svg?branch=master
+    :target: https://travis-ci.org/rickh94/do-socks-tunnel
+
+.. image:: https://codecov.io/gh/rickh94/do-socks-tunnel/branch/master/graph/badge.svg
+  :target: https://codecov.io/gh/rickh94/do-socks-tunnel
+
 A script to initialize a socks tunnel through a digital ocean droplet
 on-the-fly to have a secure connection over a potentially insecure network.
 
