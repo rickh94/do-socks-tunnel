@@ -145,6 +145,7 @@ def rm_key(key_dict):
     Arguments:
     key_dict: dict returned by key creation with paths to keypair.
     """
+    # TODO: custom error?
     os.remove(key_dict['private key'])
     os.remove(key_dict['public key'])
 
