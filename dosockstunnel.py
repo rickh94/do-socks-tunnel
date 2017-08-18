@@ -160,6 +160,31 @@ def kill_ssh(ssh_cmd):
     os.killpg(int(pid), signal.SIGTERM)
 
 
+def run_ssh(port, ipaddr, private_key_path):
+    """Creates the background ssh command (the tunnel).
+
+    Arguments:
+    portnum: the local port number that will be attached to the tunnel.
+    ipaddr: the IP address of the Digital Ocean Droplet
+    private_key_path: the path to the private key file.
+    """
+    ssh_cmd = ['ssh',
+               '-o', 'IdentitiesOnly=yes',
+               '-o', 'StrictHostKeyChecking=no',
+               '-i', private_key_path,
+               '-N',
+               '-C',
+               '-f',
+               '-D', str(port),
+               'root@{}'.format(ipaddr)]
+    print("Connecting to Droplet. This could take a moment.")
+    subprocess.run(ssh_cmd)
+    atexit.register(kill_ssh, ssh_cmd)
+    atexit.register(clean_hosts, ipaddr)
+
+    # return ssh_cmd
+
+
 def main():
     """The main function."""
     # setup
@@ -180,23 +205,8 @@ def main():
     droplet = create_droplet(dropname, ssh_key['id'], token, manager)
     atexit.register(destroy_droplet, droplet['id'], token)
     print('Droplet Created')
-    time.sleep(5)
 
-    print("Connecting to Droplet. This could take a moment.")
-    time.sleep(30)
-    ssh_cmd = ['ssh',
-               '-o', 'IdentitiesOnly=yes',
-               '-o', 'StrictHostKeyChecking=no',
-               '-i', ssh_key['private key'],
-               '-N',
-               '-C',
-               '-f',
-               '-D', str(portnum),
-               'root@{}'.format(droplet['ipaddr'])]
-    run_ssh = subprocess.run(ssh_cmd)
-    atexit.register(kill_ssh, ssh_cmd)
-    atexit.register(clean_hosts, droplet['ipaddr'])
-
+    run_ssh(portnum, droplet['ipaddr'], ssh_key['private key'])
     print('port number: {}'.format(portnum))
     input('press enter to destroy the droplet and disconnect')
 

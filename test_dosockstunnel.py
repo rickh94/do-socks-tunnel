@@ -127,3 +127,49 @@ class TestDroplet(unittest.TestCase):
             id='999999'
         )
         droplet_instance.destroy.assert_called_once_with()
+
+
+class ClientTests(unittest.TestCase):
+    """Tests client ssh and cleanup functions."""
+    def setUp(self):
+        self.ssh_cmd = ['ssh',
+                        '-o', 'IdentitiesOnly=yes',
+                        '-o', 'StrictHostKeyChecking=no',
+                        '-i', '/tmp/testkey.pem',
+                        '-N',
+                        '-C',
+                        '-f',
+                        '-D', '12345',
+                        'root@192.168.1.100']
+
+    @mock.patch('dosockstunnel.subprocess.run')
+    def test_clean_hosts(self, mock_run):
+        """Test cleaning of known_hosts file."""
+        dosockstunnel.clean_hosts('192.168.1.100')
+        mock_run.assert_called_once_with(['ssh-keygen', '-R', '192.168.1.100'])
+
+    @mock.patch('dosockstunnel.signal')
+    @mock.patch('dosockstunnel.os.killpg')
+    @mock.patch('dosockstunnel.subprocess.check_output')
+    def test_kill_ssh(self, mock_checkoutput, mock_killpg, mock_signal):
+        """Tests killing the ssh command."""
+        mock_checkoutput.return_value = '11111'
+        dosockstunnel.kill_ssh(self.ssh_cmd)
+        mock_checkoutput.assert_called_once_with([
+            'pgrep', '-f',
+            'ssh -o IdentitiesOnly=yes -o StrictHostKeyChecking=no '
+            '-i /tmp/testkey.pem -N -C -f -D 12345 root@192.168.1.100',
+        ])
+        mock_killpg.assert_called_once_with(11111, mock_signal.SIGTERM)
+
+    @mock.patch('dosockstunnel.clean_hosts')
+    @mock.patch('dosockstunnel.kill_ssh')
+    @mock.patch('dosockstunnel.atexit')
+    @mock.patch('dosockstunnel.subprocess.run')
+    def test_run_ssh(self, mock_run, mock_atexit, mock_kill_ssh,
+                     mock_clean_hosts):
+        """Tests the actual ssh command."""
+        dosockstunnel.run_ssh(12345, '192.168.1.100', '/tmp/testkey.pem')
+        mock_run.assert_called_once_with(self.ssh_cmd)
+        mock_atexit.register.assert_any_call(mock_kill_ssh, self.ssh_cmd)
+        mock_atexit.register.assert_any_call(mock_clean_hosts, '192.168.1.100')
