@@ -77,3 +77,53 @@ class TestKeys(unittest.TestCase):
         dosockstunnel.rm_key(self.key_dict_with_id)
         mock_remove.assert_any_call('/tmp/testkey.pub')
         mock_remove.assert_any_call('/tmp/testkey.pem')
+
+
+class FakeDroplet(object):
+    """A fake droplet."""
+    def __init__(self):
+        self.name = 'testdroplet'
+        self.id = '999999'
+        self.networks = {'v4': [{}]}
+        self.networks['v4'][0]['ip_address'] = '192.168.1.100'
+
+
+@mock.patch('dosockstunnel.digitalocean')
+class TestDroplet(unittest.TestCase):
+    """test droplet related functions."""
+    def test_create_droplet(self, mock_do):
+        """Test droplet creation."""
+        mock_manager = mock.MagicMock()
+        droplet_instance = mock_do.Droplet.return_value
+        mock_manager.get_all_droplets.return_value = [FakeDroplet()]
+        self.assertEqual(
+            dosockstunnel.create_droplet('testdroplet',
+                                         '123456',
+                                         'faketoken',
+                                         mock_manager
+                                         ),
+            {
+                'ipaddr': '192.168.1.100',
+                'id': '999999'
+            }
+        )
+        mock_do.Droplet.assert_called_once_with(
+            token='faketoken',
+            name='testdroplet',
+            region='nyc3',
+            image='ubuntu-16-04-x64',
+            size_slug='512mb',
+            ssh_keys=['123456'],
+            backups=False,
+        )
+        droplet_instance.create.assert_called_once_with()
+
+    def test_destroy_droplet(self, mock_do):
+        """Test droplet destruction."""
+        droplet_instance = mock_do.Droplet.return_value
+        dosockstunnel.destroy_droplet('999999', 'faketoken')
+        mock_do.Droplet.assert_called_once_with(
+            token='faketoken',
+            id='999999'
+        )
+        droplet_instance.destroy.assert_called_once_with()
