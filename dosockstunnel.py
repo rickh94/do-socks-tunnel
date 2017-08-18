@@ -1,5 +1,5 @@
-"""Not-so-simple script to initiate a digitalocean droplet and tunnel through
-it using a socks proxy.  """
+"""A (not-so-)simple script to initiate a digitalocean droplet and tunnel
+through it using a socks proxy."""
 import atexit
 import os
 import stat
@@ -17,6 +17,11 @@ from random_words import RandomWords
 
 
 def make_keys(keyname):
+    """Generate an ssh keypair.
+
+    Arguments:
+    keyname: the desired name for the key.
+    """
     key = rsa.generate_private_key(
         backend=crypto_default_backend(),
         public_exponent=65537,
@@ -47,6 +52,15 @@ def make_keys(keyname):
 
 
 def upload_key(key_dict, login_token, manager):
+    """Upload the key to Digital Ocean.
+
+    Arguments:
+    key_dict: the dict from key creation with paths to the keypair and its
+    name.
+    login_token: the token used for authentication.
+    manager: a digitalocean.Manager instance for retrieving information from
+    the api.
+    """
     with open(key_dict['public key'], 'rb') as keyfile:
         user_ssh_key = keyfile.read().decode('utf-8')
     key = digitalocean.SSHKey(token=login_token,
@@ -61,6 +75,15 @@ def upload_key(key_dict, login_token, manager):
 
 
 def create_droplet(dropname, sshkey_id, login_token, manager):
+    """Create the droplet with the ssh keys.
+
+    Arguments:
+    dropname: a name for the droplet
+    sshkey_id: the internal id of the key reported by the api.
+    login_token: the token used for authentication.
+    manager: a digitalocean.Manager instance for retrieving information from
+    the api.
+    """
     droplet = digitalocean.Droplet(
         token=login_token,
         name=dropname,
@@ -81,6 +104,12 @@ def create_droplet(dropname, sshkey_id, login_token, manager):
 
 
 def destroy_key(keyid, login_token):
+    """Remove the key from Digital Ocean.
+
+    Arguments:
+    keyid: the internal id of the key reported by the api.
+    login_token: the token used for authentication.
+    """
     key = digitalocean.SSHKey(token=login_token,
                               id=keyid,
                               )
@@ -88,29 +117,50 @@ def destroy_key(keyid, login_token):
 
 
 def destroy_droplet(dropid, login_token):
+    """Destroy the droplet.
+
+    Arguments:
+    dropid: the internal id of the droplet reported by the api.
+    login_token: the token used for authentication.
+    """
     droplet = digitalocean.Droplet(
         token=login_token,
         id=dropid,
     )
     droplet.destroy()
-# def create_tunnel(privkeypath, ipaddr)
 
 
 def clean_hosts(dropip):
+    """Remove the droplet from the known_hosts file.
+
+    Arguments:
+    dropip: the ip address of the droplet.
+    """
     subprocess.run(['ssh-keygen', '-R', dropip])
 
 
 def rm_key(key_dict):
+    """Delete the generated keys.
+
+    Arguments:
+    key_dict: dict returned by key creation with paths to keypair.
+    """
     os.remove(key_dict['private key'])
     os.remove(key_dict['public key'])
 
 
 def kill_ssh(ssh_cmd):
+    """Kill the ssh command.
+
+    Arguments:
+    ssh_cmd: list of the ssh command and arguments as passed to subprocess.
+    """
     pid = subprocess.check_output(['pgrep', '-f', ' '.join(ssh_cmd)])
     os.killpg(int(pid), signal.SIGTERM)
 
 
 def main():
+    """The main function."""
     # setup
     rw = RandomWords()
     keyname = '_'.join(rw.random_words(count=4))
@@ -131,7 +181,7 @@ def main():
     print('Droplet Created')
     time.sleep(5)
 
-    print("Connecting to droplet. This could take a moment.")
+    print("Connecting to Droplet. This could take a moment.")
     time.sleep(30)
     ssh_cmd = ['ssh',
                '-o', 'IdentitiesOnly=yes',
