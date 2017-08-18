@@ -26,7 +26,7 @@ You need:
 * A browser or system that can be configured to use socks5 proxy (chrome and
   firefox both support this in different ways).
 
-* The `pgrep` utility (comes with most linux distros). It is used
+* The ``pgrep`` utility (comes with most linux distros). It is used
   to kill the forked ssh command.
 
 You do NOT need:
