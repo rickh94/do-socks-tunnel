@@ -30,7 +30,7 @@ setup(
 
     entry_points={
         'console_scripts': [
-            'do-socks-tunnel = dosockstunnel:main'
+            'dosockstunnel = dosockstunnel:main'
         ],
     },
 )

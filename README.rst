@@ -43,7 +43,7 @@ under the name ``DO_API_TOKEN``:
 
 ``$ export DO_API_TOKEN='mytoken'``
 
-Then run ``$ do-socks-tunnel`` to create a tunneled connection using openssh.
+Then run ``$ dosockstunnel`` to create a tunneled connection using openssh.
 It will print the port number to stdout. Then just send all your traffic
 through localhost:portnumber to have your traffic encrypted.
 It is important to keep the originating terminal open (or run the script as a

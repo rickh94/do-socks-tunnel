@@ -25,7 +25,8 @@ def make_keys(keyname):
     private_key = key.private_bytes(
         crypto_serialization.Encoding.PEM,
         crypto_serialization.PrivateFormat.PKCS8,
-        crypto_serialization.NoEncryption())
+        crypto_serialization.NoEncryption()
+    )
     public_key = key.public_key().public_bytes(
         crypto_serialization.Encoding.OpenSSH,
         crypto_serialization.PublicFormat.OpenSSH
