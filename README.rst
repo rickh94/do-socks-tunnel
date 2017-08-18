@@ -91,9 +91,12 @@ The default configuration is currently hard-coded and is as follows\:
 
   - size: 4096 bits
 
+Tests
+=====
+Currently has tests for sshkey functions. Run with ``pytest``.
+
 TODO
 ====
-* BUG: fix auto-killing of ssh command.
 
 * BUG: sometimes ssh connection is refused. timing?
 
